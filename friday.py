@@ -40,6 +40,7 @@ def read_voice_cmd():
 
 
 if __name__ == '__main__':
+
     speak_text_cmd('Hello Mrs. Patel Shah. ')
 
     while True:
@@ -47,13 +48,13 @@ if __name__ == '__main__':
         voice_note = read_voice_cmd()
         print('{}'.format(voice_note))
 
-        if 'Hello' in voice_note:
+        if 'hello' in voice_note:
             speak_text_cmd('How can I help you today?')
             continue
         elif 'open' in voice_note:
             speak_text_cmd('Here it is...')
             os.system('open /Applications/"{}".app'.format(voice_note.replace('open ', '')))
             continue
-        elif 'Bye' in voice_note:
+        elif 'bye' in voice_note:
             speak_text_cmd('Bye Mrs. Shah')
             exit()
