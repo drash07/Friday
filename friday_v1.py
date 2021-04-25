@@ -7,10 +7,21 @@ import random
 speech = sr.Recognizer()
 greeting_dict = {'hello': 'hello', 'hi': 'hi'}
 open_launch_dict = {'open': 'open', 'launch': 'launch'}
+google_search_dict = {'what': 'what', 'why': 'why', 'who': 'who', 'which': 'which'}
 social_media_dict = {'facebook': 'http://www.facebook.com', 'youtube': 'https://www.youtube.com/'}
 
 mp3_greeting_list = ['mp3/friday/greeting_1.mp3', 'mp3/friday/greeting_1.mp3']
 mp3_open_launch_list = ['mp3/friday/open_launch2.mp3', 'mp3/friday/open_launch1.mp3']
+mp3_google_search_list = []
+mp3_listening_issues_list = ['mp3/friday/difficutly_hearing1.mp3']
+mp3_struggling_list = ['mp3/friday/difficulty_hearing2.mp3']
+
+error_occurrence = 0
+
+
+def is_valid_google_search(phrase):
+    if google_search_dict.get(phrase.split(' ')[0]) == phrase.split(' ')[0]:
+        return True
 
 
 def play_sound(mp3_list):
@@ -21,15 +32,31 @@ def play_sound(mp3_list):
 def read_voice_cmd():
     voice_text = ''
     print('Listening...')
-    with sr.Microphone() as source:
-        audio = speech.listen(source=source, timeout=10, phrase_time_limit=5)
+
+    global error_occurrence
+
     try:
+        with sr.Microphone() as source:
+            audio = speech.listen(source=source, timeout=10, phrase_time_limit=5)
         voice_text = speech.recognize_google(audio)
+
     except sr.UnknownValueError:
+        if error_occurrence == 0:
+            play_sound(mp3_listening_issues_list)
+            error_occurrence+=1
+        elif error_occurrence == 1:
+            play_sound(mp3_struggling_list)
+            error_occurrence+=1
         pass
     except sr.RequestError as e:
         print('Network error')
     except sr.WaitTimeoutError:
+        if error_occurrence == 0:
+            play_sound(mp3_listening_issues_list)
+            error_occurrence += 1
+        elif error_occurrence == 1:
+            play_sound(mp3_struggling_list)
+            error_occurrence += 1
         pass
     return voice_text
 
@@ -81,5 +108,14 @@ if __name__ == '__main__':
             else:
                 os.system('open /Applications/"{}".app'.format(voice_note.replace('open ', '').replace('launch ', '')))
             continue
+        elif is_valid_google_search(voice_note):
+            print('Searching....')
+            play_sound(mp3_google_search_list)
+            webbrowser.open('https://www.google.com/search?q={}'.format(voice_note))
+            continue
+        elif 'thank you friday' in voice_note:
+            playsound('mp3/friday/thankyou1.mp3')
+            continue
         elif 'bye' in voice_note:
+            playsound('mp3/friday/goodbye1.mp3')
             exit()
